@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	//"strconv"
 	//"strings"
+	"runtime"
 )
 
 const APP_NAME = "gologq"
@@ -37,12 +38,17 @@ var opts struct {
 	RedisKey string `long:"redis_key" description:"Redis list key" default:"gologq"`
 	RedisPassword string `long:"redis_password" description:"Redis password"`
 	RedisDB int64 `long:"redis_db" description:"Redis DB index"`
+
+	// Worker specific options
+	NumWorkers int `long:"workers" description:"Number of worker threads to spawn (Default: CPUs * 3)"`
 }
 
+// Start a Redis-backed Syslog server
 func main() {
 
 	// Parse arguments
 	_, err := flags.Parse(&opts)
+	// From https://www.snip2code.com/Snippet/605806/go-flags-suggested--h-documentation
 	if err != nil {
 		typ := err.(*flags.Error).Type
 		if typ == flags.ErrHelp {
@@ -58,15 +64,30 @@ func main() {
 	backend_formatter := logging.NewBackendFormatter(log_backend, format)
 	logging.SetBackend(backend_formatter)
 
+	// Print version number if requested from command line
 	if opts.DoVersion == true {
 		fmt.Printf("%s %s at your service.\n", APP_NAME, APP_VERSION)
 		os.Exit(10)
 	}
 
+	// Enable debug logging
 	if opts.Verbose == true {
 		logging.SetLevel(logging.DEBUG, "")
 	} else {
 		logging.SetLevel(logging.INFO, "")
+	}
+
+	// Cap number of workers spawned by command line args to 1024
+	// this prevents someone from overwhelming the number of automatically generated Redis threads
+	num_workers := opts.NumWorkers
+	if num_workers != 0 {
+		if num_workers > 1024 {
+			log.Fatalf("Can't spawn more than 1024 worker threads. (You requested %d)", num_workers)
+			os.Exit(1)
+		}
+	} else {
+		// If we happen to have more than 1024 threads by autodetection, it should be fine.
+		num_workers = runtime.NumCPU() * 3
 	}
 
 	hostname, _ := os.Hostname()
@@ -75,11 +96,12 @@ func main() {
 	// Let's get moving.
 	log.Debugf("Commandline options: %+v", opts)
 	redis_client := setupRedisClient()
-	startServer(redis_client)
+	startServer(redis_client, num_workers)
 
 	log.Info("Server finished. Exiting.")
 }
 
+// Initiate a Redis client
 func setupRedisClient() *redis.Client {
 	client := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", opts.RedisHost, opts.RedisPort),
@@ -87,6 +109,7 @@ func setupRedisClient() *redis.Client {
 		DB:       opts.RedisDB,
 	})
 
+	// Are we able to ping the Redis server and receive a successful result?
 	pong, err := client.Ping().Result()
 	if err != nil {
 		log.Fatalf("Unable to contact redis server: %s", err)
@@ -94,27 +117,32 @@ func setupRedisClient() *redis.Client {
 		log.Debugf("Ping response from redis server: %s", pong)
 	}
 
+	// Hand back a redis.Client object
 	return client
 }
 
-func handleGoLogs(channel syslog.LogPartsChannel, redis_client *redis.Client) {
-	log.Debug("Entered receiver")
+// Worker thread for incoming logs
+// A channel, redis client, and worker ID are required.
+func handleIncomingLogs(channel syslog.LogPartsChannel, redis_client *redis.Client, worker_id int) {
+	log.Debug("Started log worker #%d", worker_id)
 	for logParts := range channel {
 		json_data, err := json.Marshal(logParts)
 		if err != nil {
-			log.Errorf("JSON error:", err)
+			log.Errorf("Worker %d JSON error:", worker_id, err)
 		}
-		log.Debugf("RECV: %s", json_data)
+
+		log.Debugf("Worker #%d RECV: %s", worker_id, json_data)
 
 		// Push to redis list
 		err = redis_client.LPush(opts.RedisKey, fmt.Sprintf("%s", json_data)).Err()
 		if err != nil {
-			log.Errorf("Redis error: %s", err)
+			log.Errorf("Worker #%d Redis error: %s", worker_id, err)
 		}
 	}
 }
 
-func startServer(redis_client *redis.Client) {
+// Start the server and launch the workers
+func startServer(redis_client *redis.Client, num_workers int) {
 	log.Debug("Entered startServer")
 
 	// Start up the syslog server
@@ -126,16 +154,18 @@ func startServer(redis_client *redis.Client) {
 	server.SetHandler(handler)
 	err := server.ListenTCP(fmt.Sprintf("%s:%d", opts.ListenAddress, opts.ListenPort))
 
-	// Were we able to start the server?
+	// Were we able to start the tcp server?
 	if err != nil {
 		log.Fatalf("Can't listen to TCP socket. Failing. %+v", err)
 	}
 
 	server.Boot()
 
-
-	// The main worker here.
-	go handleGoLogs(channel, redis_client)
+	// Spawn worker threads
+	log.Infof("Spawning %d worker threads...", num_workers)
+	for w := 1; w <= num_workers; w++ {
+		go handleIncomingLogs(channel, redis_client, w)
+	}
 
 	log.Info("Listening for connections")
 	server.Wait()
