@@ -25,22 +25,22 @@ var format = logging.MustStringFormatter(
 )
 
 var opts struct {
-	Verbose bool `short:"v" long:"verbose" description:"Enable DEBUG logging"`
+	Verbose bool `short:"v" long:"verbose" env:"GOLOGQ_VERBOSE" description:"Enable DEBUG logging"`
 	DoVersion bool `short:"V" long:"version" description:"Print version and exit"`
 
 	// Syslog specific options
-	ListenAddress string `long:"listen" description:"Syslog receiver host" default:"0.0.0.0"`
-	ListenPort int `long:"port" description:"Syslog receiver port" default:"514"`
+	ListenAddress string `long:"listen" env:"GOLOGQ_LISTEN_ADDR" description:"Syslog receiver host" default:"0.0.0.0"`
+	ListenPort int `long:"port" env:"GOLOGQ_LISTEN_PORT" description:"Syslog receiver port" default:"514"`
 
 	// Redis specific options
-	RedisHost string `long:"redis_host" description:"Redis host" default:"localhost"`
-	RedisPort int `long:"redis_port" description:"Redis port" default:"6379"`
-	RedisKey string `long:"redis_key" description:"Redis list key" default:"gologq"`
-	RedisPassword string `long:"redis_password" description:"Redis password"`
-	RedisDB int64 `long:"redis_db" description:"Redis DB index"`
+	RedisHost string `long:"redis_host" env:"GOLOGQ_REDIS_HOST" description:"Redis host" default:"localhost"`
+	RedisPort int `long:"redis_port" env:"GOLOGQ_REDIS_PORT" description:"Redis port" default:"6379"`
+	RedisKey string `long:"redis_key" env:"GOLOGQ_REDIS_KEY" description:"Redis list key" default:"gologq"`
+	RedisPassword string `long:"redis_password" env:"GOLOGQ_REDIS_PASSWORD" description:"Redis password"`
+	RedisDB int64 `long:"redis_db" env:"GOLOGQ_REDIS_DB" description:"Redis DB index"`
 
 	// Worker specific options
-	NumWorkers int `long:"workers" description:"Number of worker threads to spawn (Default: CPUs * 3)"`
+	NumWorkers int `long:"workers" env:"GOLOGQ_NUM_WORKERS" description:"Number of worker threads to spawn (Default: CPUs * 3)"`
 }
 
 // Start a Redis-backed Syslog server

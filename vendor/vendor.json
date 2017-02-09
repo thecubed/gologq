@@ -1,0 +1,67 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "2jm5p7TKKExCRmt+McpLz0jPg2U=",
+			"path": "github.com/jeromer/syslogparser",
+			"revision": "ff71fe7a7d5279df4b964b31f7ee4adf117277f6",
+			"revisionTime": "2015-07-17T04:28:40Z"
+		},
+		{
+			"checksumSHA1": "bs9tX3R4ZAdomGt2WsNWPDUkSFE=",
+			"path": "github.com/jeromer/syslogparser/rfc3164",
+			"revision": "ff71fe7a7d5279df4b964b31f7ee4adf117277f6",
+			"revisionTime": "2015-07-17T04:28:40Z"
+		},
+		{
+			"checksumSHA1": "kTq48W634U1PRy3mMlYVO5NxQAc=",
+			"path": "github.com/jeromer/syslogparser/rfc5424",
+			"revision": "ff71fe7a7d5279df4b964b31f7ee4adf117277f6",
+			"revisionTime": "2015-07-17T04:28:40Z"
+		},
+		{
+			"checksumSHA1": "qRMfSXThGi5MDncZCgZCcGCc5e4=",
+			"path": "github.com/jessevdk/go-flags",
+			"revision": "0a28dbe50f23d8fce6b016975b964cfe7b97a20a",
+			"revisionTime": "2015-11-15T20:33:50Z"
+		},
+		{
+			"checksumSHA1": "MaiJUPmOU6SkzACQ97xS6qxqa9s=",
+			"path": "github.com/op/go-logging",
+			"revision": "f2de3fa73ede49624df5ca7467011ac4fcd43635",
+			"revisionTime": "2015-11-24T22:46:48Z"
+		},
+		{
+			"checksumSHA1": "tGcoFB/NFIc+m/S2lMuL/ojcRnY=",
+			"path": "gopkg.in/bsm/ratelimit.v1",
+			"revision": "fbc2d5a2daac4dc3801ee3073874800e2be6ccd1",
+			"revisionTime": "2015-11-25T11:32:05Z"
+		},
+		{
+			"checksumSHA1": "iuuigcX3YCvi2qGrvbhJsjvFNf0=",
+			"path": "gopkg.in/mcuadros/go-syslog.v2",
+			"revision": "6cba2bfcf64a025c899aa3be061161d2b89d8b54",
+			"revisionTime": "2015-07-16T13:34:00Z"
+		},
+		{
+			"checksumSHA1": "vZEjtuqqU4TEDqJqVutiX3toQPU=",
+			"path": "gopkg.in/mcuadros/go-syslog.v2/format",
+			"revision": "6cba2bfcf64a025c899aa3be061161d2b89d8b54",
+			"revisionTime": "2015-07-16T13:34:00Z"
+		},
+		{
+			"checksumSHA1": "mwEyO99F2m7bVAahM+Xtqs6CoSg=",
+			"path": "gopkg.in/redis.v3",
+			"revision": "ba9dda7567ee6939c265e36f734e6ae3e014779a",
+			"revisionTime": "2015-12-02T14:23:50Z"
+		},
+		{
+			"checksumSHA1": "tNI/mAuqqQqfYU4vuJghUroIts4=",
+			"path": "gopkg.in/redis.v3/internal/consistenthash",
+			"revision": "ba9dda7567ee6939c265e36f734e6ae3e014779a",
+			"revisionTime": "2015-12-02T14:23:50Z"
+		}
+	],
+	"rootPath": "github.com/thecubed/gologq"
+}
