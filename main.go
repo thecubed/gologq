@@ -17,7 +17,7 @@ import (
 )
 
 const APP_NAME = "gologq"
-const APP_VERSION = "0.0.1"
+const APP_VERSION = "0.0.2"
 
 var log = logging.MustGetLogger(APP_NAME)
 var format = logging.MustStringFormatter(
